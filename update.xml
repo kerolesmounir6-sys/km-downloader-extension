@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <gupdate xmlns='http://www.google.com/update2/response' protocol='2.0'>
   <app appid='ceojdhgfbcnbfdipehfdfalmcpjjnglg'>
-    <updatecheck codebase='https://raw.githubusercontent.com/kerolesmounir6-sys/km-downloader-extension/main/km_downloader.crx' version='1.0.0' />
+    <updatecheck codebase='https://raw.githubusercontent.com/kerolesmounir6-sys/km-downloader-extension/main/km_extension.crx' version='1.0.1' />
   </app>
 </gupdate>
