@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA66McyojEgNozDKihMnIWGbnVEp2JOId0TX3IhCsm9w1FC683Ize2r85qOZoQw1useHGE/8ZcQoXj1kAHEFFN/kUzKY3RMf8LZlP2NlSvL9dZmHnu+r2CJAUo1878997Y/ouAjewZqbRGQgPtMW/RphgDcFO2Myjhq/iko+3v7bXggTzhR3a6k2OiTVIBK7kt342+RMmVuvWrP6sl1sA0elza3pAMkBiUM1f8ANT1c4sRb4okLCB/RX8GWMuJHZImnA3CBYRIG5mrWZd5w9RHhfeyPGuA8jK9nC3euasroxjBtF5v1gRZ0WSbfOpWhgKvrnylgNbYB9Er6EDbd2FdCQIDAQAB",
+  "name": "KM Downloader Bridge",
+  "version": "1.0.10",
+  "description": "\u064a\u0631\u0628\u0637 Chrome \u0628\u062a\u0637\u0628\u064a\u0642 KM Downloader \u0644\u0644\u062a\u062d\u0645\u064a\u0644 \u0628\u0636\u063a\u0637\u0629 \u0632\u0631",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "notifications",
+    "downloads",
+    "nativeMessaging",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content_scripts/media_detector.js",
+        "content_scripts/km_content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "version_name": "1.0.10"
+}

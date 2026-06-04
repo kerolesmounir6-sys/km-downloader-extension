@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>KM Downloader</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --success: #22c55e;
+      --error: #ef4444;
+      --border: #334155;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 260px;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header .logo { font-size: 22px; }
+    .header h1 { font-size: 14px; font-weight: 700; }
+    .header .ver { font-size: 10px; color: var(--muted); }
+    .status-bar {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .dot.on { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .dot.off { background: var(--error); }
+    .dot.check { background: #f59e0b; }
+    .body { padding: 16px; }
+    .btn {
+      width: 100%; padding: 12px; border: none; border-radius: 10px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      background: var(--accent); color: white;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .footer {
+      padding: 10px 16px; text-align: center; font-size: 10px;
+      color: var(--muted); border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="logo">📥</span>
+    <div>
+      <h1>KM Downloader</h1>
+      <span class="ver">v1.0.3</span>
+    </div>
+  </div>
+  <div class="status-bar">
+    <span class="dot check" id="dot"></span>
+    <span id="statusText">جاري الفحص...</span>
+  </div>
+  <div class="body">
+    <button class="btn" id="openBtn">🔗 فتح البرنامج</button>
+  </div>
+  <div class="footer">KMTeach Technology &copy; 2026</div>
+  <script src="popup.js"></script>
+</body>
+</html>
