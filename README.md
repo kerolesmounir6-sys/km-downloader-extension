@@ -1,30 +1,28 @@
 # KM Downloader Bridge — Browser Extension
 
-<img src="chrome_extension/icons/icon128.png" align="right" width="128" height="128">
+ربط Chrome/Edge/Brave/Vivaldi/Opera بتطبيق KM Downloader للتحميل بضغطة زر.
 
-ربط Chrome/Edge/Brave/Vivaldi/Opera بتطبيق **KM Downloader** للتحميل بضغطة زر.
+## ✨ المميزات
 
-[![Build](https://github.com/kerolesmounir6-sys/km-downloader-extension/actions/workflows/build.yml/badge.svg)](https://github.com/kerolesmounir6-sys/km-downloader-extension/actions/workflows/build.yml)
+- 🎬 **تحميل الفيديو والصوت** من أي موقع بضغطة زر
+- 🖱️ **Context Menu** (كليك يمين) على الروابط
+- 🔍 **اكتشاف تلقائي** للوسائط في الصفحة
+- ⚡ **اتصال مباشر** مع تطبيق KM Downloader
 
-## Features
+## 📥 التثبيت
 
-- تحميل الفيديو والصوت من أي موقع بضغطة زر
-- Context Menu: اضغط كليك يمين على الرابط → "تحميل عبر KM Downloader"
-- اكتشاف تلقائي للوسائط في الصفحة
-- Native Messaging للتواصل مع تطبيق KM Downloader
+### الطريقة الأولى (مستحسنة) — تلقائياً
+الإضافة تثبت تلقائياً مع تطبيق KM Downloader الرئيسي.
 
-## التثبيت
+### الطريقة الثانية — يدويًا
+1. افتح `chrome://extensions` في متصفحك
+2. فعّل **Developer mode** (الزاوية العلوية اليمين)
+3. اسحب ملف `km_extension.crx` إلى الصفحة
+4. وافق على التثبيت
 
-### تلقائياً (مستحسن)
-يتم تثبيت الإضافة تلقائياً عند تثبيت تطبيق **KM Downloader**.
+## 🔧 التطوير
 
-### يدوياً
-1. افتح `chrome://extensions`
-2. فعّل **Developer mode**
-3. اسحب `km_extension.crx` إلى الصفحة  
-   أو استخدم **Load unpacked** ← اختر مجلد `chrome_extension/`
-
-## Build
+لإعادة بناء الإضافة:
 
 ```bash
 python build_extension.py
@@ -32,12 +30,10 @@ python build_extension.py
 
 المخرجات في مجلد `build/`.
 
-## Extension ID
+## 📝 الترخيص
 
-```
-ceojdhgfbcnbfdipehfdfalmcpjjnglg
-```
+MIT License
 
-## License
+---
 
-MIT
+**هل تحتاج إلى مساعدة؟** اضغط على زر Help في صفحة الإضافة.
