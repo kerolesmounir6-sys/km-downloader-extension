@@ -171,6 +171,9 @@ def _create_zip(ext_dir):
 
 
 def _create_crx_python(zip_data, pem_path, output_path):
+    # ✅ FIXED: Create output directory before writing file
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
     with open(pem_path, "rb") as f:
         key = serialization.load_pem_private_key(f.read(), password=None)
     pub = key.public_key()
