@@ -2,7 +2,7 @@
 
 # ============================================================
 #  KM Downloader — Browser Extension Installer (PowerShell)
-#  Usage: Right-click > "Run with PowerShell" (as Admin)
+#  Silent mode - No technical details shown to user
 # ============================================================
 
 $UPDATE_URL = "https://kerolesmounir6-sys.github.io/km-downloader-extension/update.xml"
@@ -17,61 +17,37 @@ $BROWSERS = @(
     @{ Name = "Opera";   PolicyKey = "HKLM:\SOFTWARE\Policies\Opera Software\Opera\ExtensionInstallForcelist"; NMHKey = "HKLM:\SOFTWARE\Opera Software\Opera\NativeMessagingHosts\com.km.downloader"; Process = "opera.exe"; ExtPage = "opera://extensions" }
 )
 
-Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "  KM Downloader - Browser Extension Installer" -ForegroundColor Cyan
-Write-Host "============================================" -ForegroundColor Cyan
-Write-Host ""
+# ── Silent mode: No console output ──
+$ErrorActionPreference = "SilentlyContinue"
 
 # ── Step 1: Kill all running browsers ──
-Write-Host "[1/4] Closing all browsers..." -ForegroundColor Yellow
-$browsersClosed = @()
 foreach ($b in $BROWSERS) {
-    $proc = Get-Process -Name ($b.Process -replace '\.exe$', '') -ErrorAction SilentlyContinue
-    if ($proc) {
-        Stop-Process -Name ($b.Process -replace '\.exe$', '') -Force -ErrorAction SilentlyContinue
-        $browsersClosed += $b.Name
-        Write-Host "  [CLOSED] $($b.Name)" -ForegroundColor DarkYellow
-    }
-}
-
-if ($browsersClosed.Count -eq 0) {
-    Write-Host "  [INFO] No browsers running" -ForegroundColor Gray
+    Stop-Process -Name ($b.Process -replace '\.exe$', '') -Force -ErrorAction SilentlyContinue
 }
 
 Start-Sleep -Seconds 1
 
 # ── Step 2: ExtensionInstallForcelist ──
-Write-Host "`n[2/4] Adding ExtensionInstallForcelist to Registry..." -ForegroundColor Yellow
 $successCount = 0
 foreach ($b in $BROWSERS) {
     $path = $b.PolicyKey
     try {
         $null = New-Item -Path $path -Force -ErrorAction Stop
         $null = New-ItemProperty -Path $path -Name "1" -Value "$($EXT_ID);$($UPDATE_URL)" -PropertyType String -Force -ErrorAction Stop
-        Write-Host "  [OK] $($b.Name)" -ForegroundColor Green
         $successCount++
-    } catch {
-        Write-Host "  [!!] $($b.Name) - $_" -ForegroundColor Red
-    }
+    } catch { }
 }
 
 # ── Step 3: Native Messaging Hosts ──
-Write-Host "`n[3/4] Adding NativeMessagingHosts to Registry..." -ForegroundColor Yellow
 foreach ($b in $BROWSERS) {
     $path = $b.NMHKey
     try {
         $null = New-Item -Path $path -Force -ErrorAction Stop
         $null = New-ItemProperty -Path $path -Name "(default)" -Value $NMH_PATH -PropertyType String -Force -ErrorAction Stop
-        Write-Host "  [OK] $($b.Name)" -ForegroundColor Green
-    } catch {
-        Write-Host "  [!] $($b.Name) - may not be installed" -ForegroundColor DarkYellow
-    }
+    } catch { }
 }
 
 # ── Step 4: Auto-restart browsers ──
-Write-Host "`n[4/4] Restarting browsers..." -ForegroundColor Yellow
-Write-Host ""
-
 $toRestart = @()
 foreach ($b in $BROWSERS) {
     $path = $b.PolicyKey
@@ -80,46 +56,80 @@ foreach ($b in $BROWSERS) {
     }
 }
 
+Start-Sleep -Seconds 2
+
+foreach ($b in $toRestart) {
+    Start-Process $b.Process -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 1
+}
+
+# ── Show success message (simple popup) ──
+if ($successCount -gt 0) {
+    # Create a simple popup using Windows Forms
+    [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
+    
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "KM Downloader"
+    $form.Width = 400
+    $form.Height = 250
+    $form.StartPosition = "CenterScreen"
+    $form.TopMost = $true
+    $form.FormBorderStyle = "FixedDialog"
+    $form.MaximizeBox = $false
+    $form.MinimizeBox = $false
+    $form.ControlBox = $true
+    
+    # Background color
+    $form.BackColor = [System.Drawing.Color]::FromArgb(245, 245, 245)
+    
+    # Icon label
+    $iconLabel = New-Object System.Windows.Forms.Label
+    $iconLabel.Text = "✅"
+    $iconLabel.Font = New-Object System.Drawing.Font("Arial", 48)
+    $iconLabel.TextAlign = "MiddleCenter"
+    $iconLabel.Location = New-Object System.Drawing.Point(150, 20)
+    $iconLabel.Size = New-Object System.Drawing.Size(100, 60)
+    $form.Controls.Add($iconLabel)
+    
+    # Title label
+    $titleLabel = New-Object System.Windows.Forms.Label
+    $titleLabel.Text = "تم التثبيت بنجاح!"
+    $titleLabel.Font = New-Object System.Drawing.Font("Arial", 18, [System.Drawing.FontStyle]::Bold)
+    $titleLabel.TextAlign = "MiddleCenter"
+    $titleLabel.Location = New-Object System.Drawing.Point(10, 80)
+    $titleLabel.Size = New-Object System.Drawing.Size(380, 40)
+    $form.Controls.Add($titleLabel)
+    
+    # Message label
+    $messageLabel = New-Object System.Windows.Forms.Label
+    $messageLabel.Text = "تم تثبيت التوسيع في متصفحك.`r`nسيتم فتحه تلقائياً الآن."
+    $messageLabel.Font = New-Object System.Drawing.Font("Arial", 12)
+    $messageLabel.TextAlign = "MiddleCenter"
+    $messageLabel.Location = New-Object System.Drawing.Point(10, 120)
+    $messageLabel.Size = New-Object System.Drawing.Size(380, 60)
+    $form.Controls.Add($messageLabel)
+    
+    # OK button
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Text = "حسناً"
+    $okButton.Font = New-Object System.Drawing.Font("Arial", 12)
+    $okButton.Location = New-Object System.Drawing.Point(150, 190)
+    $okButton.Size = New-Object System.Drawing.Size(100, 40)
+    $okButton.BackColor = [System.Drawing.Color]::FromArgb(66, 133, 244)
+    $okButton.ForeColor = [System.Drawing.Color]::White
+    $okButton.Cursor = "Hand"
+    $okButton.Add_Click({ $form.Close() })
+    $form.Controls.Add($okButton)
+    
+    $form.ShowDialog() | Out-Null
+}
+
+# ── Open extensions page ──
 if ($toRestart.Count -gt 0) {
     Start-Sleep -Seconds 2
-    
-    foreach ($b in $toRestart) {
-        try {
-            Start-Process $b.Process -ErrorAction SilentlyContinue
-            Write-Host "  [STARTED] $($b.Name)" -ForegroundColor Green
-            Start-Sleep -Seconds 1
-        } catch {
-            Write-Host "  [!] $($b.Name) - not found in PATH" -ForegroundColor DarkYellow
-        }
-    }
-    
-    Write-Host ""
-    Write-Host "============================================" -ForegroundColor Green
-    Write-Host "  ✅ Installation Completed Successfully!" -ForegroundColor Green
-    Write-Host "============================================" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "  Registry keys written:     $successCount browser(s)" -ForegroundColor Green
-    Write-Host "  Browsers restarted:        $($toRestart.Count)" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "  Your browsers are restarting now..." -ForegroundColor Cyan
-    Write-Host "  The extension will load automatically in a few moments." -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "  Check the extensions page:" -ForegroundColor White
-    Write-Host "  Chrome: chrome://extensions" -ForegroundColor White
-    Write-Host "  Edge:   edge://extensions" -ForegroundColor White
-    Write-Host "  Brave:  brave://extensions" -ForegroundColor White
-    Write-Host ""
-    
-    # Open extensions page for the first browser
-    Start-Sleep -Seconds 3
     if ($toRestart[0].Name -eq "Chrome") {
         Start-Process "chrome.exe" -ArgumentList "chrome://extensions" -ErrorAction SilentlyContinue
     } elseif ($toRestart[0].Name -eq "Edge") {
         Start-Process "msedge.exe" -ArgumentList "edge://extensions" -ErrorAction SilentlyContinue
     }
-} else {
-    Write-Host "  [ERROR] No browsers configured in Registry" -ForegroundColor Red
 }
-
-Write-Host "`nPress Enter to exit..." -ForegroundColor Cyan
-Read-Host
