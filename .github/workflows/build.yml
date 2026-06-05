@@ -22,6 +22,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Restore PEM key from secret
+        run: |
+          if ("${{ secrets.EXTENSION_PEM }}") {
+            New-Item -ItemType Directory -Path "$env:USERPROFILE\.km_downloader\keys" -Force | Out-Null
+            Set-Content -Path "$env:USERPROFILE\.km_downloader\keys\extension.pem" -Value "${{ secrets.EXTENSION_PEM }}" -Encoding UTF8
+            Write-Output "PEM key restored from secret"
+          } else {
+            Write-Output "No PEM secret found - will generate new key"
+          }
       - run: pip install cryptography
       - run: python build_extension.py
       - name: Copy index.html for Pages
