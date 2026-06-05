@@ -2,7 +2,7 @@
 
 # ============================================================
 #  KM Downloader — Browser Extension Installer (PowerShell)
-#  Silent mode - No technical details shown to user
+#  Silent mode - Completely hidden from user
 # ============================================================
 
 $UPDATE_URL = "https://kerolesmounir6-sys.github.io/km-downloader-extension/update.xml"
@@ -17,8 +17,11 @@ $BROWSERS = @(
     @{ Name = "Opera";   PolicyKey = "HKLM:\SOFTWARE\Policies\Opera Software\Opera\ExtensionInstallForcelist"; NMHKey = "HKLM:\SOFTWARE\Opera Software\Opera\NativeMessagingHosts\com.km.downloader"; Process = "opera.exe"; ExtPage = "opera://extensions" }
 )
 
-# ── Silent mode: No console output ──
+# ── Silent mode: Hide PowerShell window ──
 $ErrorActionPreference = "SilentlyContinue"
+
+# Hide console window
+$null = [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms")
 
 # ── Step 1: Kill all running browsers ──
 foreach ($b in $BROWSERS) {
@@ -63,75 +66,69 @@ foreach ($b in $toRestart) {
     Start-Sleep -Seconds 1
 }
 
-# ── Show success message (simple popup) ──
+# ── Show completion message (simple popup) ──
 if ($successCount -gt 0) {
-    # Create a simple popup using Windows Forms
+    Start-Sleep -Seconds 3
+    
+    # Create popup using Windows Forms
     [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
     
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "KM Downloader"
-    $form.Width = 450
-    $form.Height = 300
+    $form.Text = "KM Downloader Setup"
+    $form.Width = 400
+    $form.Height = 200
     $form.StartPosition = "CenterScreen"
     $form.TopMost = $true
     $form.FormBorderStyle = "FixedDialog"
     $form.MaximizeBox = $false
     $form.MinimizeBox = $false
-    $form.ControlBox = $true
+    $form.ControlBox = $false
     $form.ShowIcon = $false
     
     # Background color
-    $form.BackColor = [System.Drawing.Color]::FromArgb(245, 245, 245)
-    
-    # Icon label (success checkmark)
-    $iconLabel = New-Object System.Windows.Forms.Label
-    $iconLabel.Text = "✅"
-    $iconLabel.Font = New-Object System.Drawing.Font("Arial", 60, [System.Drawing.FontStyle]::Bold)
-    $iconLabel.TextAlign = "MiddleCenter"
-    $iconLabel.Location = New-Object System.Drawing.Point(150, 15)
-    $iconLabel.Size = New-Object System.Drawing.Size(150, 80)
-    $form.Controls.Add($iconLabel)
+    $form.BackColor = [System.Drawing.Color]::White
     
     # Title label
     $titleLabel = New-Object System.Windows.Forms.Label
-    $titleLabel.Text = "تم التثبيت بنجاح!"
-    $titleLabel.Font = New-Object System.Drawing.Font("Arial", 20, [System.Drawing.FontStyle]::Bold)
+    $titleLabel.Text = "Installation Complete"
+    $titleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 16, [System.Drawing.FontStyle]::Bold)
     $titleLabel.TextAlign = "MiddleCenter"
-    $titleLabel.Location = New-Object System.Drawing.Point(10, 95)
-    $titleLabel.Size = New-Object System.Drawing.Size(430, 50)
+    $titleLabel.Location = New-Object System.Drawing.Point(10, 30)
+    $titleLabel.Size = New-Object System.Drawing.Size(380, 40)
     $titleLabel.ForeColor = [System.Drawing.Color]::FromArgb(34, 139, 34)
     $form.Controls.Add($titleLabel)
     
     # Message label
     $messageLabel = New-Object System.Windows.Forms.Label
-    $messageLabel.Text = "تم تثبيت التوسيع في متصفحك بنجاح.`r`n`r`nسيتم فتح متصفحك الآن لتفعيل التوسيع."
-    $messageLabel.Font = New-Object System.Drawing.Font("Arial", 13)
+    $messageLabel.Text = "The extension has been successfully installed.`r`nYour browser will open shortly."
+    $messageLabel.Font = New-Object System.Drawing.Font("Segoe UI", 11)
     $messageLabel.TextAlign = "MiddleCenter"
-    $messageLabel.Location = New-Object System.Drawing.Point(20, 145)
-    $messageLabel.Size = New-Object System.Drawing.Size(410, 80)
+    $messageLabel.Location = New-Object System.Drawing.Point(10, 75)
+    $messageLabel.Size = New-Object System.Drawing.Size(380, 60)
     $messageLabel.ForeColor = [System.Drawing.Color]::FromArgb(80, 80, 80)
     $form.Controls.Add($messageLabel)
     
-    # OK button
-    $okButton = New-Object System.Windows.Forms.Button
-    $okButton.Text = "حسناً"
-    $okButton.Font = New-Object System.Drawing.Font("Arial", 13, [System.Drawing.FontStyle]::Bold)
-    $okButton.Location = New-Object System.Drawing.Point(175, 240)
-    $okButton.Size = New-Object System.Drawing.Size(100, 40)
-    $okButton.BackColor = [System.Drawing.Color]::FromArgb(66, 133, 244)
-    $okButton.ForeColor = [System.Drawing.Color]::White
-    $okButton.Cursor = "Hand"
-    $okButton.FlatStyle = "Flat"
-    $okButton.FlatAppearance.BorderSize = 0
-    $okButton.Add_Click({ $form.Close() })
-    $form.Controls.Add($okButton)
+    # Finish button
+    $finishButton = New-Object System.Windows.Forms.Button
+    $finishButton.Text = "Finish"
+    $finishButton.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
+    $finishButton.Location = New-Object System.Drawing.Point(150, 150)
+    $finishButton.Size = New-Object System.Drawing.Size(100, 35)
+    $finishButton.BackColor = [System.Drawing.Color]::FromArgb(66, 133, 244)
+    $finishButton.ForeColor = [System.Drawing.Color]::White
+    $finishButton.Cursor = "Hand"
+    $finishButton.FlatStyle = "Flat"
+    $finishButton.FlatAppearance.BorderSize = 0
+    $finishButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $finishButton.Add_Click({ $form.Close() })
+    $form.Controls.Add($finishButton)
     
-    # Hover effect for button
-    $okButton.Add_MouseEnter({
-        $okButton.BackColor = [System.Drawing.Color]::FromArgb(50, 110, 220)
+    # Hover effect
+    $finishButton.Add_MouseEnter({
+        $finishButton.BackColor = [System.Drawing.Color]::FromArgb(50, 110, 220)
     })
-    $okButton.Add_MouseLeave({
-        $okButton.BackColor = [System.Drawing.Color]::FromArgb(66, 133, 244)
+    $finishButton.Add_MouseLeave({
+        $finishButton.BackColor = [System.Drawing.Color]::FromArgb(66, 133, 244)
     })
     
     $form.ShowDialog() | Out-Null
@@ -139,7 +136,7 @@ if ($successCount -gt 0) {
 
 # ── Open extensions page ──
 if ($toRestart.Count -gt 0) {
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 1
     if ($toRestart[0].Name -eq "Chrome") {
         Start-Process "chrome.exe" -ArgumentList "chrome://extensions" -ErrorAction SilentlyContinue
     } elseif ($toRestart[0].Name -eq "Edge") {
@@ -148,3 +145,6 @@ if ($toRestart.Count -gt 0) {
         Start-Process "brave.exe" -ArgumentList "brave://extensions" -ErrorAction SilentlyContinue
     }
 }
+
+# Exit silently
+Exit
