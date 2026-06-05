@@ -22,21 +22,41 @@ Write-Host "  KM Downloader - Browser Extension Installer" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
-# ── Step 1: ExtensionInstallForcelist ──
-Write-Host "[1/3] Adding ExtensionInstallForcelist..." -ForegroundColor Yellow
+# ── Step 1: Kill all running browsers ──
+Write-Host "[1/4] Closing all browsers..." -ForegroundColor Yellow
+$browsersClosed = @()
+foreach ($b in $BROWSERS) {
+    $proc = Get-Process -Name ($b.Process -replace '\.exe$', '') -ErrorAction SilentlyContinue
+    if ($proc) {
+        Stop-Process -Name ($b.Process -replace '\.exe$', '') -Force -ErrorAction SilentlyContinue
+        $browsersClosed += $b.Name
+        Write-Host "  [CLOSED] $($b.Name)" -ForegroundColor DarkYellow
+    }
+}
+
+if ($browsersClosed.Count -eq 0) {
+    Write-Host "  [INFO] No browsers running" -ForegroundColor Gray
+}
+
+Start-Sleep -Seconds 1
+
+# ── Step 2: ExtensionInstallForcelist ──
+Write-Host "`n[2/4] Adding ExtensionInstallForcelist to Registry..." -ForegroundColor Yellow
+$successCount = 0
 foreach ($b in $BROWSERS) {
     $path = $b.PolicyKey
     try {
         $null = New-Item -Path $path -Force -ErrorAction Stop
         $null = New-ItemProperty -Path $path -Name "1" -Value "$($EXT_ID);$($UPDATE_URL)" -PropertyType String -Force -ErrorAction Stop
         Write-Host "  [OK] $($b.Name)" -ForegroundColor Green
+        $successCount++
     } catch {
         Write-Host "  [!!] $($b.Name) - $_" -ForegroundColor Red
     }
 }
 
-# ── Step 2: Native Messaging Hosts ──
-Write-Host "[2/3] Adding NativeMessagingHosts..." -ForegroundColor Yellow
+# ── Step 3: Native Messaging Hosts ──
+Write-Host "`n[3/4] Adding NativeMessagingHosts to Registry..." -ForegroundColor Yellow
 foreach ($b in $BROWSERS) {
     $path = $b.NMHKey
     try {
@@ -48,61 +68,58 @@ foreach ($b in $BROWSERS) {
     }
 }
 
-# ── Step 3: Restart browsers? ──
-Write-Host "[3/3] Restart browsers to apply changes?" -ForegroundColor Yellow
+# ── Step 4: Auto-restart browsers ──
+Write-Host "`n[4/4] Restarting browsers..." -ForegroundColor Yellow
 Write-Host ""
-Write-Host "Select browsers to restart (comma-separated numbers, or A for all, or 0 to skip):" -ForegroundColor White
-for ($i = 0; $i -lt $BROWSERS.Count; $i++) {
-    $proc = Get-Process -Name ($BROWSERS[$i].Process -replace '\.exe$', '') -ErrorAction SilentlyContinue
-    $status = if ($proc) { "RUNNING" } else { "not running" }
-    Write-Host "  [$($i+1)] $($BROWSERS[$i].Name)`t($status)" -ForegroundColor $(if ($proc) { "Green" } else { "Gray" })
-}
-Write-Host "  [A] All browsers"
-Write-Host "  [0] Skip restart"
-Write-Host ""
-$choice = Read-Host "Enter choice"
 
-if ($choice -ne "0") {
-    $toRestart = @()
-    if ($choice -eq "A" -or $choice -eq "a") {
-        $toRestart = $BROWSERS
-    } else {
-        $indices = $choice -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -match '^\d+$' }
-        foreach ($i in $indices) {
-            $idx = [int]$i - 1
-            if ($idx -ge 0 -and $idx -lt $BROWSERS.Count) {
-                $toRestart += $BROWSERS[$idx]
-            }
-        }
-    }
-
-    if ($toRestart.Count -gt 0) {
-        Write-Host "`nKilling browsers..." -ForegroundColor Yellow
-        foreach ($b in $toRestart) {
-            Stop-Process -Name ($b.Process -replace '\.exe$', '') -Force -ErrorAction SilentlyContinue
-            Write-Host "  [KILLED] $($b.Name)" -ForegroundColor DarkYellow
-        }
-
-        Start-Sleep -Seconds 2
-
-        Write-Host "`nRestarting browsers..." -ForegroundColor Green
-        $firstBrowser = $toRestart[0]
-        foreach ($b in $toRestart) {
-            try {
-                Start-Process $b.Process -ErrorAction Stop
-                Write-Host "  [STARTED] $($b.Name)" -ForegroundColor Green
-            } catch {
-                Write-Host "  [!] $($b.Name) - not found in PATH" -ForegroundColor DarkYellow
-            }
-        }
-
-                        # Open extensions page for the first browser
-                            try {
-                                Start-Process $firstBrowser.Process -ArgumentList "--new-window $($firstBrowser.ExtPage)"
-                            } catch { }
+$toRestart = @()
+foreach ($b in $BROWSERS) {
+    $path = $b.PolicyKey
+    if (Test-Path $path) {
+        $toRestart += $b
     }
 }
 
-Write-Host "`nDone!" -ForegroundColor Cyan
-Write-Host "Open the extensions page in each browser to verify installation." -ForegroundColor White
-Read-Host "`nPress Enter to exit"
+if ($toRestart.Count -gt 0) {
+    Start-Sleep -Seconds 2
+    
+    foreach ($b in $toRestart) {
+        try {
+            Start-Process $b.Process -ErrorAction SilentlyContinue
+            Write-Host "  [STARTED] $($b.Name)" -ForegroundColor Green
+            Start-Sleep -Seconds 1
+        } catch {
+            Write-Host "  [!] $($b.Name) - not found in PATH" -ForegroundColor DarkYellow
+        }
+    }
+    
+    Write-Host ""
+    Write-Host "============================================" -ForegroundColor Green
+    Write-Host "  ✅ Installation Completed Successfully!" -ForegroundColor Green
+    Write-Host "============================================" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "  Registry keys written:     $successCount browser(s)" -ForegroundColor Green
+    Write-Host "  Browsers restarted:        $($toRestart.Count)" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "  Your browsers are restarting now..." -ForegroundColor Cyan
+    Write-Host "  The extension will load automatically in a few moments." -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Check the extensions page:" -ForegroundColor White
+    Write-Host "  Chrome: chrome://extensions" -ForegroundColor White
+    Write-Host "  Edge:   edge://extensions" -ForegroundColor White
+    Write-Host "  Brave:  brave://extensions" -ForegroundColor White
+    Write-Host ""
+    
+    # Open extensions page for the first browser
+    Start-Sleep -Seconds 3
+    if ($toRestart[0].Name -eq "Chrome") {
+        Start-Process "chrome.exe" -ArgumentList "chrome://extensions" -ErrorAction SilentlyContinue
+    } elseif ($toRestart[0].Name -eq "Edge") {
+        Start-Process "msedge.exe" -ArgumentList "edge://extensions" -ErrorAction SilentlyContinue
+    }
+} else {
+    Write-Host "  [ERROR] No browsers configured in Registry" -ForegroundColor Red
+}
+
+Write-Host "`nPress Enter to exit..." -ForegroundColor Cyan
+Read-Host
