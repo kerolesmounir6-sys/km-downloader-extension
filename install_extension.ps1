@@ -70,56 +70,69 @@ if ($successCount -gt 0) {
     
     $form = New-Object System.Windows.Forms.Form
     $form.Text = "KM Downloader"
-    $form.Width = 400
-    $form.Height = 250
+    $form.Width = 450
+    $form.Height = 300
     $form.StartPosition = "CenterScreen"
     $form.TopMost = $true
     $form.FormBorderStyle = "FixedDialog"
     $form.MaximizeBox = $false
     $form.MinimizeBox = $false
     $form.ControlBox = $true
+    $form.ShowIcon = $false
     
     # Background color
     $form.BackColor = [System.Drawing.Color]::FromArgb(245, 245, 245)
     
-    # Icon label
+    # Icon label (success checkmark)
     $iconLabel = New-Object System.Windows.Forms.Label
     $iconLabel.Text = "✅"
-    $iconLabel.Font = New-Object System.Drawing.Font("Arial", 48)
+    $iconLabel.Font = New-Object System.Drawing.Font("Arial", 60, [System.Drawing.FontStyle]::Bold)
     $iconLabel.TextAlign = "MiddleCenter"
-    $iconLabel.Location = New-Object System.Drawing.Point(150, 20)
-    $iconLabel.Size = New-Object System.Drawing.Size(100, 60)
+    $iconLabel.Location = New-Object System.Drawing.Point(150, 15)
+    $iconLabel.Size = New-Object System.Drawing.Size(150, 80)
     $form.Controls.Add($iconLabel)
     
     # Title label
     $titleLabel = New-Object System.Windows.Forms.Label
     $titleLabel.Text = "تم التثبيت بنجاح!"
-    $titleLabel.Font = New-Object System.Drawing.Font("Arial", 18, [System.Drawing.FontStyle]::Bold)
+    $titleLabel.Font = New-Object System.Drawing.Font("Arial", 20, [System.Drawing.FontStyle]::Bold)
     $titleLabel.TextAlign = "MiddleCenter"
-    $titleLabel.Location = New-Object System.Drawing.Point(10, 80)
-    $titleLabel.Size = New-Object System.Drawing.Size(380, 40)
+    $titleLabel.Location = New-Object System.Drawing.Point(10, 95)
+    $titleLabel.Size = New-Object System.Drawing.Size(430, 50)
+    $titleLabel.ForeColor = [System.Drawing.Color]::FromArgb(34, 139, 34)
     $form.Controls.Add($titleLabel)
     
     # Message label
     $messageLabel = New-Object System.Windows.Forms.Label
-    $messageLabel.Text = "تم تثبيت التوسيع في متصفحك.`r`nسيتم فتحه تلقائياً الآن."
-    $messageLabel.Font = New-Object System.Drawing.Font("Arial", 12)
+    $messageLabel.Text = "تم تثبيت التوسيع في متصفحك بنجاح.`r`n`r`nسيتم فتح متصفحك الآن لتفعيل التوسيع."
+    $messageLabel.Font = New-Object System.Drawing.Font("Arial", 13)
     $messageLabel.TextAlign = "MiddleCenter"
-    $messageLabel.Location = New-Object System.Drawing.Point(10, 120)
-    $messageLabel.Size = New-Object System.Drawing.Size(380, 60)
+    $messageLabel.Location = New-Object System.Drawing.Point(20, 145)
+    $messageLabel.Size = New-Object System.Drawing.Size(410, 80)
+    $messageLabel.ForeColor = [System.Drawing.Color]::FromArgb(80, 80, 80)
     $form.Controls.Add($messageLabel)
     
     # OK button
     $okButton = New-Object System.Windows.Forms.Button
     $okButton.Text = "حسناً"
-    $okButton.Font = New-Object System.Drawing.Font("Arial", 12)
-    $okButton.Location = New-Object System.Drawing.Point(150, 190)
+    $okButton.Font = New-Object System.Drawing.Font("Arial", 13, [System.Drawing.FontStyle]::Bold)
+    $okButton.Location = New-Object System.Drawing.Point(175, 240)
     $okButton.Size = New-Object System.Drawing.Size(100, 40)
     $okButton.BackColor = [System.Drawing.Color]::FromArgb(66, 133, 244)
     $okButton.ForeColor = [System.Drawing.Color]::White
     $okButton.Cursor = "Hand"
+    $okButton.FlatStyle = "Flat"
+    $okButton.FlatAppearance.BorderSize = 0
     $okButton.Add_Click({ $form.Close() })
     $form.Controls.Add($okButton)
+    
+    # Hover effect for button
+    $okButton.Add_MouseEnter({
+        $okButton.BackColor = [System.Drawing.Color]::FromArgb(50, 110, 220)
+    })
+    $okButton.Add_MouseLeave({
+        $okButton.BackColor = [System.Drawing.Color]::FromArgb(66, 133, 244)
+    })
     
     $form.ShowDialog() | Out-Null
 }
@@ -131,5 +144,7 @@ if ($toRestart.Count -gt 0) {
         Start-Process "chrome.exe" -ArgumentList "chrome://extensions" -ErrorAction SilentlyContinue
     } elseif ($toRestart[0].Name -eq "Edge") {
         Start-Process "msedge.exe" -ArgumentList "edge://extensions" -ErrorAction SilentlyContinue
+    } elseif ($toRestart[0].Name -eq "Brave") {
+        Start-Process "brave.exe" -ArgumentList "brave://extensions" -ErrorAction SilentlyContinue
     }
 }
